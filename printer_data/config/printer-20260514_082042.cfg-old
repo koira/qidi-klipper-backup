@@ -1,0 +1,776 @@
+[include mmu/base/*.cfg]
+[include mmu/optional/client_macros.cfg]
+#[include mmu/optional/mmu_menu.cfg]
+[include mmu/addons/mmu_eject_buttons.cfg]
+[include mmu/addons/mmu_erec_cutter.cfg]
+# Plus4 config created by Phil1988(github)/coco.33(discord) on 04.05.2025
+# For more information check out my wiki: https://github.com/Phil1988/FreeDi/wiki
+
+
+#####################################################################
+# Kinematics
+#####################################################################
+[printer]
+kinematics:corexy
+max_velocity: 600
+max_accel: 20000
+max_z_velocity: 20
+max_z_accel: 500
+square_corner_velocity: 8
+
+
+#####################################################################
+# Motherboard and periphery
+#####################################################################
+[temperature_sensor Mainboard_RK3328]
+sensor_type: temperature_host
+min_temp: 10
+max_temp: 100
+
+[mcu]
+serial: /dev/ttyS0
+restart_method: command
+baud: 500000
+
+[mcu cartographer]
+serial: /dev/serial/by-id/usb-Cartographer_stm32f042x6_1F0007000E43304253383020-if00
+restart_method: command # Not needed for probes using CAN. 
+
+[temperature_sensor Mainboard_STM32F402]
+sensor_type: temperature_mcu
+sensor_mcu: mcu
+
+[mcu Toolhead]
+serial: /dev/ttyS2
+restart_method: command
+baud: 500000
+
+[temperature_sensor Toolhead_STM32F103XE]
+sensor_type: temperature_mcu
+sensor_mcu: Toolhead
+min_temp: 0
+max_temp: 100
+
+
+#####################################################################
+# Features
+#####################################################################
+# For saving GCODE files
+[virtual_sdcard]
+path: ~/printer_data/gcodes
+on_error_gcode: CANCEL_PRINT
+
+# For enabling pause/resume
+[pause_resume]
+
+# Activating exclude objects feature
+[display_status]
+[exclude_object]
+
+# Expanding idle timeout
+[idle_timeout]
+timeout: 5400   ; 90min timeout
+
+# Activating GCODE arc feature
+[gcode_arcs]
+resolution: 1.0
+
+# Allowing free move (can be dangerous!)
+[force_move]
+enable_force_move: True
+
+# Activating responses
+[respond]
+default_type: echo
+
+
+#####################################################################
+# FreeDi
+#####################################################################
+[include freedi.cfg] 
+#####################################################################
+# Macros
+#####################################################################
+[include macros.cfg]
+#####################################################################
+# timelapse.cfg
+#####################################################################
+[include timelapse.cfg]
+#####################################################################
+# preheat macro and buttons
+#####################################################################
+[include preheat.cfg]
+
+
+[resonance_tester]
+accel_chip: adxl345
+probe_points:
+    152.5, 152.5, 10
+accel_per_hz: 75
+sweeping_period: 0
+max_smoothing: 0.5
+    
+[adxl345]
+cs_pin: Toolhead:PA4
+spi_software_sclk_pin: Toolhead:PA5
+spi_software_mosi_pin: Toolhead:PA7
+spi_software_miso_pin: Toolhead:PA6
+axes_map: -x, z, -y
+# CARTOGRAPHER ADXL345
+#[adxl345]
+#cs_pin: cartographer:PA3
+#spi_bus: spi1
+
+[input_shaper]
+#shaper_type_x: mzv
+#shaper_freq_x: 57.6
+#shaper_type_y: mzv
+#shaper_freq_y: 46.6
+
+
+#####################################################################
+# Hotend
+#####################################################################
+[extruder]
+step_pin: Toolhead:PB9
+dir_pin: Toolhead:PB8
+enable_pin: !Toolhead:PC15
+rotation_distance: 53.7
+gear_ratio: 1517:170
+microsteps: 16
+full_steps_per_rotation: 200
+nozzle_diameter: 0.400
+filament_diameter: 1.75
+min_temp: 0
+max_temp: 360
+min_extrude_temp: 170
+smooth_time: 0.5
+step_pulse_duration: 0.000002
+
+heater_pin: Toolhead:PB3
+sensor_type: MAX6675 # MAX31855 # MAX6675
+sensor_pin: Toolhead:PB12
+max_power: 1.0
+#control: pid  
+#pid_Kp: 33.879
+#pid_Ki: 6.453
+#pid_Kd: 44.467
+
+spi_speed: 100000
+spi_software_sclk_pin: Toolhead:PB13
+spi_software_mosi_pin: Toolhead:PA11
+spi_software_miso_pin: Toolhead:PB14
+
+pressure_advance: 0.032
+pressure_advance_smooth_time: 0.03
+max_extrude_cross_section:500
+instantaneous_corner_velocity: 10.000
+max_extrude_only_distance: 1000.0
+max_extrude_only_velocity: 5000
+max_extrude_only_accel: 5000
+
+[verify_heater extruder]
+max_error: 120
+check_gain_time:20
+hysteresis: 5
+heating_gain: 1
+
+
+#####################################################################
+# Heated bed
+#####################################################################
+[heater_bed]
+heater_pin: PB10
+sensor_type: NTC 100K MGB18-104F39050L32
+sensor_pin: PA0
+max_power: 1.0
+#control: pid
+#pid_kp: 70.638
+#pid_ki: 0.671
+#pid_kd: 1859.554
+min_temp: -50
+max_temp: 125
+pwm_cycle_time: 0.02 # for 50Hz line power 
+#pwm_cycle_time: 0.016 # for 60Hz line power
+
+[verify_heater heater_bed]
+max_error: 200
+check_gain_time: 360
+hysteresis: 5
+heating_gain: 1
+
+# [bed_screws]
+# screw1:20,20
+# screw1_name: Front left
+# screw2: 285,20
+# screw2_name: Front right
+# screw3: 285,281
+# screw3_name: Back right
+# screw4: 20,281
+# screw4_name: Back left
+
+#####################################################################
+# Bed mesh
+#####################################################################
+#[bed_mesh]
+#speed: 150               
+#horizontal_move_z: 2.6   
+#mesh_min: 25,10
+#mesh_max: 295,295   
+#probe_count: 9,9     
+#algorithm: bicubic
+#bicubic_tension: 0.3
+#mesh_pps: 4, 4
+
+# Cartographer Touch
+[bed_mesh]
+Speed:400 # 300
+Horizontal_move_z: 3 # 5
+mesh_min: 35,35 # 25,18 Minimum position of the detection point
+mesh_max: 270,270 # 305,300
+probe_count: 20,20 # Number of measuring points - 6x6 - 7x7 etc.
+#algorithm:bicubic
+zero_reference_position: 152.5, 152.5 # center of your bed
+adaptive_margin: 10
+#bicubic_tension: 0.3
+mesh_pps: 0,0 # 2,2
+#fade_start: 2
+#fade_end: 10
+#fade_target: 0
+split_delta_z: 0.01
+move_check_distance: 4
+
+[safe_z_home]
+home_xy_position: 152.5,152.5
+# Example home_xy_position: 175,175 - This would be for a 350 * 350mm bed.
+z_hop: 10
+
+#####################################################################
+# Probe
+#####################################################################
+#!# Pay attention to this section and compare it with your stock backup config
+#[probe]
+#pin: ^!Toolhead:PA10
+#x_offset: 25
+#y_offset: 1.3
+#z_offset: 1.00             #!# change this to 0 if you get a "Probe triggered prior to movement" - Error
+#speed: 5
+#samples: 2
+#samples_result: average
+#sample_retract_dist: 0.7
+#samples_tolerance: 0.08
+#samples_tolerance_retries: 3
+
+[cartographer]
+# Offsets are measured from the centre of your coil, to the tip of your nozzle
+# on a level axis. It is vital that this is accurate.
+mcu: cartographer
+x_offset: 0 # This is the offset of your probe from the nozzle tip, to the centre of the coil.
+y_offset: -18.8 # This is the offset of your probe from the nozzle tip, to the centre of the coil.
+verbose: no # yes # For extra output
+
+# Check this for documentation https://github.com/frap129/qidi_auto_z_offset
+# Add AUTO_Z_LOAD_OFFSET to your PRINT_START macro to load the value every time you start a print. 
+# If you make adujstments to the offset by micro-stepping durring a print, you can save that with AUTO_Z_SAVE_GCODE_OFFSET and SAVE_CONFIG
+
+# [axis_twist_compensation]
+# We can automate axis twist compensation calibration using touch to get the nozzle offset. Simply run CARTOGRAPHER_AXIS_TWIST_COMPENSATION
+# and let Cartographer do the rest. Remember to run SAVE_CONFIG to persist the change.
+# You MUST ensure that your Twist Axis is within your probe boundaries.
+# You can pass an axis to compensate along both axes, using AXIS=Y.
+# If your axis twist is dependent on chamber temperature, you can run CARTOGRAPHER_AXIS_TWIST_COMPENSATION as part of your start print macro. 
+# Just remember to run it after leveling your bed and before bed mesh calibrate.
+
+[auto_z_offset]
+pin: PC1
+# Adjust this z_offset value for a good first layer: 
+# decrease if lines are squished (eg -0.2 -> -0.25)
+# increase if lines are thin/not sticking (-0.2 -> -0.15)
+z_offset: -0.2 
+calibrated_z_offset: -1.00
+speed: 13
+probe_accel: 50
+samples: 5
+samples_result: median
+samples_tolerance: 0.013
+samples_tolerance_retries: 5
+offset_samples: 3
+prepare_gcode:
+   G90
+   G0 Z3
+   G91
+   SET_PIN PIN=bed_sensor VALUE=0
+   M204 S10000
+   {% set i = 6 %}
+   {% for iteration in range(i|int) %}
+       G1 Z5 F1200
+       G1 Z-5 F1200
+   {% endfor %}
+   G1 Z3
+   G90
+   SET_PIN PIN=bed_sensor VALUE=1
+
+[output_pin bed_sensor]
+pin: !PA14
+pwm: false
+shutdown_value:0
+value:0
+
+#####################################################################
+# Heated chamber
+#####################################################################
+[temperature_sensor chamber_sensor]
+sensor_type: NTC 100K MGB18-104F39050L32
+sensor_pin: PA1
+
+
+[heater_generic chamber]
+heater_pin: PC8
+#!# Caution!
+#set max_power to 0.4 for 110V
+#set max_power to 0.7 for 220V
+#set max_power to 1.0 if you are using a quality aftermarket SSR with a heat sink
+max_power: 0.4                #!# Pay attention to this value and compare it with your stock backup config and with caution (read the comments)
+#sensor_type: NTC 100K MGB18-104F39050L32
+#sensor_pin: PA1
+sensor_type: temperature_combined
+sensor_list: temperature_sensor Toolhead_STM32F103XE, temperature_sensor Toolhead_STM32F103XE, temperature_sensor Toolhead_STM32F103XE, temperature_sensor chamber_sensor
+combination_method: mean
+maximum_deviation: 70
+control: pid
+pid_Kp: 63.418 
+pid_Ki: 1.342 
+pid_Kd: 749.125
+min_temp: -100
+max_temp: 75
+
+[verify_heater chamber]
+max_error: 400
+check_gain_time: 600
+hysteresis: 5
+heating_gain: 2
+
+[temperature_sensor Chamber_Heater]
+sensor_type: NTC 100K MGB18-104F39050L32
+sensor_pin: PC2
+min_temp: -100
+max_temp: 140
+
+[temperature_sensor cartographer]
+sensor_type: temperature_mcu
+sensor_mcu: cartographer
+min_temp: 5
+max_temp: 105
+
+########################################
+# Filament sensors
+########################################
+[filament_switch_sensor filament_tangle_sensor]
+switch_pin: PC3
+pause_on_runout: True
+runout_gcode:
+            M118 Filament tangled!
+event_delay: 3.0
+pause_delay: 0.5
+
+
+# Modified hall_filament_width_sensor.py implementation to only use it as filament detection sensor
+# reason is that measured values are unreliable and it cant really be used as a real [hall_filament_width_sensor]
+# [freedi_hall_filament_width_sensor]
+# adc1: Toolhead:PA2
+# adc2: Toolhead:PA3
+# cal_dia1: 1.50
+# cal_dia2: 2.0
+# raw_dia1: 14206
+# raw_dia2: 15278
+# default_nominal_filament_diameter: 1.75
+# max_difference: 0.00
+# measurement_delay: 50
+# enable: True
+# measurement_interval: 3
+# logging: False
+# min_diameter: 1.00
+# use_current_dia_while_delay: False
+# pause_on_runout: True
+# runout_gcode:
+#             M118 Filament run out!
+# event_delay: 3.0
+# pause_delay: 0.5
+
+[filament_switch_sensor Toolhead]
+switch_pin: ^Toolhead:PA3
+pause_on_runout: True
+runout_gcode:
+  PAUSE
+  M118 Filament run out
+
+#####################################################################
+# Fans
+#####################################################################
+## Part cooling fan 
+# [fan_generic partfan]
+# pin: Toolhead:PA8
+# max_power: 1.0
+# cycle_time: 0.0100
+# hardware_pwm: false
+# kick_start_time: 0.200
+# off_below: 0.08
+# shutdown_speed: 0
+[fan]
+pin: Toolhead:PA8
+max_power: 1.0
+cycle_time: 0.0100
+hardware_pwm: false
+kick_start_time: 0.200
+off_below: 0.08
+shutdown_speed: 0.0
+
+## Big side radial turbo fan
+[fan_generic sidefan]
+pin: PA8
+max_power: 1.0
+cycle_time: 0.0100
+hardware_pwm: false
+kick_start_time: 0.250
+off_below: 0.3
+shutdown_speed: 0
+
+## Activated charcoal blowing fan
+[fan_generic filterfan]
+pin: PC9
+max_power: 1.0
+cycle_time: 0.0100
+hardware_pwm: false
+kick_start_time: 0.200
+off_below: 0.3
+shutdown_speed: 0
+
+## Chamber heater fan
+[heater_fan chamber_heater_fan]
+pin: PA4
+max_power: 1.0
+shutdown_speed: 0
+kick_start_time: 0.5
+heater: chamber
+fan_speed: 1.0
+off_below: 0
+heater_temp: 40 
+
+## Cold end and toolhead housing fans
+[heater_fan hotend_fan]
+pin: Toolhead:PB5
+max_power: 1.0
+shutdown_speed: 1.0
+kick_start_time: 0.5
+heater: extruder
+heater_temp: 50.0
+fan_speed: 1.0
+off_below: 0
+
+# Toolhead cooling fan
+[heater_fan hotend_fan2]
+pin:Toolhead: PB4
+max_power: 1.0
+shutdown_speed: 1.0
+kick_start_time: 0.5
+heater: extruder
+heater_temp: 50.0
+fan_speed: 1.0
+off_below: 0
+
+# Toolhead cooling fan
+[heater_fan hotend_fan3]
+pin:Toolhead: PB10
+max_power: 1.0
+shutdown_speed: 1.0
+kick_start_time: 0.5
+heater: extruder
+heater_temp: 50.0
+fan_speed: 1.0
+off_below: 0
+
+#!# Delete the next section if your stock backup config doesnt have it
+## Controllable Mainboard cooling fan
+[temperature_fan Mainboard_fan]
+sensor_type: temperature_host 
+pin: PC4
+max_power: 1.0  
+cycle_time: 0.01
+sensor_type: temperature_combined
+sensor_list: temperature_sensor Mainboard_RK3328, temperature_sensor Mainboard_STM32F402
+combination_method: max                                           # use the maximum reading of the sensors
+maximum_deviation: 999.9                                          # we don't care about the difference in temperature
+shutdown_speed: 0.0
+kick_start_time: 0.4
+off_below: 0.19
+min_temp: 0
+max_temp: 85.0 
+target_temp: 60.0
+min_speed: 0
+max_speed: 1.0
+control: pid
+pid_deriv_time: 2.0
+pid_Kp: 5.0
+pid_Ki: 2.5
+pid_Kd: 3.5
+
+
+#####################################################################
+# Light
+#####################################################################
+## caselight LEDs
+[output_pin caselight]
+pin: PC7
+pwm: true
+cycle_time: 0.0100
+shutdown_value:0
+value:1
+
+
+#####################################################################
+# Buzzer
+#####################################################################
+## Buzzer
+[output_pin buzzer]
+pin: PA2
+pwm: false
+shutdown_value:0
+value:0
+
+[output_pin sound]
+pin: Toolhead:PA1
+value:0
+
+
+#####################################################################
+# Power outage shutdown
+#####################################################################
+[output_pin pwc]
+pin: PA3
+pwm: False
+value: 1
+shutdown_value: 1
+
+
+#####################################################################
+# Drives
+#####################################################################
+[stepper_x]
+step_pin: PB4
+dir_pin: !PB3
+enable_pin: !PB5
+microsteps: 32
+rotation_distance: 38.82
+full_steps_per_rotation: 200 
+endstop_pin: tmc2240_stepper_x:virtual_endstop
+position_min: -1.5
+position_endstop: -1.5
+position_max: 307
+homing_speed: 105 # 55
+homing_retract_dist:0
+homing_positive_dir:False
+step_pulse_duration:0.0000001
+
+[stepper_y]
+step_pin: PC14
+dir_pin: !PC13
+enable_pin: !PC15
+microsteps: 32
+rotation_distance: 38.82
+full_steps_per_rotation:200  
+endstop_pin: tmc2240_stepper_y:virtual_endstop
+position_min: -2
+position_endstop: -2
+position_max: 325
+homing_speed: 105 # 55
+homing_retract_dist: 0
+homing_positive_dir: False
+step_pulse_duration: 0.0000001
+
+[stepper_z]
+step_pin: PB1
+dir_pin: PB6
+enable_pin: !PB0
+microsteps: 128
+rotation_distance: 4
+full_steps_per_rotation: 200
+endstop_pin: probe:z_virtual_endstop
+position_max:285
+position_min: -4
+homing_speed: 13
+homing_retract_dist: 0 # for cartographer
+second_homing_speed: 5
+homing_positive_dir: False
+step_pulse_duration: 0.000002
+
+[stepper_z1]
+step_pin: PC10
+dir_pin: PA15
+enable_pin: !PC11
+microsteps: 128
+rotation_distance: 4
+full_steps_per_rotation: 200
+step_pulse_duration: 0.000002
+
+#####################################################################
+# Steppers configuration
+#####################################################################
+[tmc2209 extruder]
+uart_pin: Toolhead:PC13
+interpolate: False
+run_current: 0.714             #!# Pay attention to this value and compare it with your stock backup config
+stealthchop_threshold: 0
+sense_resistor: 0.075
+
+[tmc2240 stepper_x]
+cs_pin: PD2
+spi_software_sclk_pin: PA5
+spi_software_mosi_pin: PA7
+spi_software_miso_pin: PA6
+spi_speed: 200000
+run_current: 1.07               #!# Pay attention to this value and compare it with your stock backup config
+interpolate: False
+stealthchop_threshold: 0
+diag0_pin: !PB8
+driver_SGT: 1
+rref: 12000
+
+[tmc2240 stepper_y]
+cs_pin: PB9
+spi_software_sclk_pin: PA5
+spi_software_mosi_pin: PA7
+spi_software_miso_pin: PA6
+spi_speed: 200000
+run_current: 1.07              #!# Pay attention to this value and compare it with your stock backup config
+interpolate: False
+stealthchop_threshold: 0
+diag0_pin: !PC0
+driver_SGT:1
+rref: 12000
+
+[tmc2209 stepper_z]
+uart_pin: PB7
+run_current: 1.07              #!# Pay attention to this value and compare it with your stock backup config
+interpolate: False
+stealthchop_threshold: 9999999999
+diag_pin: ^PA13
+sense_resistor: 0.075
+
+
+[tmc2209 stepper_z1]
+uart_pin: PC5
+run_current: 1.07              #!# Pay attention to this value and compare it with your stock backup config
+interpolate: False
+stealthchop_threshold: 9999999999
+diag_pin: ^PC12
+sense_resistor: 0.075
+
+#####################################################################
+# Bed tilt adjust
+#####################################################################
+[z_tilt]
+z_positions:
+    -17.5,138.5
+    335.7,138.5
+
+points:
+    0,138.5
+    255,138.5
+
+speed: 150
+horizontal_move_z: 10
+retries: 5
+retry_tolerance: 0.013
+
+#####################################################################
+# Screws tilt adjust
+#####################################################################
+[screws_tilt_adjust] 
+screw_thread: CW-M4
+horizontal_move_z: 10
+speed: 100
+screw1: 25,38.8
+screw1_name: Front left
+screw2: 280,38.8
+screw2_name: Front right
+screw3: 280,281.2
+screw3_name: Back right
+screw4: 25,281.2
+screw4_name: Back left
+
+[include moonraker_obico_macros.cfg]
+
+[include shell_command.cfg]
+
+#*# <---------------------- SAVE_CONFIG ---------------------->
+#*# DO NOT EDIT THIS BLOCK OR BELOW. The contents are auto-generated.
+#*#
+#*# [bed_mesh default]
+#*# version = 1
+#*# points =
+#*# 	  -0.071758, -0.066714, -0.055497, -0.054337, -0.044335, -0.044334, -0.041937, -0.029601, -0.025883, -0.032081, -0.033323, -0.029601, -0.021032, -0.022170, -0.017233, -0.010132, -0.005123, 0.008142, 0.006923, 0.015452
+#*# 	  -0.059359, -0.056657, -0.048080, -0.051832, -0.041840, -0.056660, -0.036861, -0.029602, -0.039349, -0.039445, -0.024642, -0.024747, -0.039349, -0.030744, -0.017426, -0.003897, -0.017426, -0.002671, -0.006356, 0.007119
+#*# 	  -0.054337, -0.062938, -0.064195, -0.045582, -0.041840, -0.039349, -0.041842, -0.034565, -0.037051, -0.024642, -0.023406, -0.019700, -0.024740, -0.014768, -0.006350, 0.014237, 0.000811, -0.005316, -0.005123, -0.002671
+#*# 	  -0.054145, -0.049331, -0.046831, -0.051832, -0.041840, -0.043087, -0.041840, -0.039539, -0.027123, -0.021032, -0.032081, -0.034565, -0.024642, -0.014768, -0.023503, -0.012494, -0.010036, -0.005123, -0.006449, -0.014768
+#*# 	  -0.054145, -0.056849, -0.041840, -0.049330, -0.041840, -0.041840, -0.031988, -0.027123, -0.023406, -0.017426, -0.016194, -0.012494, -0.018566, -0.010034, -0.017329, -0.010034, -0.000217, -0.002769, -0.005123, -0.007578
+#*# 	  -0.047022, -0.039539, -0.039349, -0.039350, -0.039349, -0.036957, -0.029601, -0.024646, -0.027123, -0.030752, -0.017233, -0.016097, -0.027123, -0.035808, -0.024642, -0.017233, -0.019802, -0.010034, -0.013728, -0.014961
+#*# 	  -0.032081, -0.032083, -0.041840, -0.033231, -0.036861, -0.028362, -0.039349, -0.029601, -0.019700, -0.014961, -0.017329, -0.022170, -0.012494, -0.014768, -0.013728, -0.002671, -0.007579, -0.012494, -0.006447, -0.012494
+#*# 	  -0.034565, -0.029602, -0.027123, -0.022268, -0.027312, -0.027123, -0.036861, -0.025883, -0.014961, -0.008806, -0.016000, -0.024837, -0.024743, -0.017426, -0.019705, -0.029601, -0.023406, -0.019894, -0.025883, -0.024642
+#*# 	  -0.032081, -0.038107, -0.002671, -0.011269, -0.005316, -0.023406, -0.017426, -0.010034, -0.005123, -0.005219, 0.004481, -0.005123, -0.000221, 0.002229, 0.008240, -0.005316, -0.010036, -0.007578, -0.011264, -0.017233
+#*# 	  -0.027123, -0.009939, 0.018906, 0.034639, 0.014237, -0.008806, -0.016194, -0.005123, -0.001543, -0.005123, -0.003897, -0.007578, 0.005702, -0.000415, -0.003897, -0.019700, -0.017235, -0.017233, -0.012498, -0.024642
+#*# 	  -0.012494, 0.008046, 0.042874, 0.060733, 0.052467, 0.014235, -0.012494, -0.008806, 0.004481, 0.006923, 0.002133, -0.002671, 0.015449, 0.014237, 0.007119, 0.002229, -0.001444, -0.002671, -0.008806, -0.017233
+#*# 	  -0.017233, 0.005702, 0.038253, 0.044171, 0.026181, 0.003451, -0.002671, -0.003897, -0.002671, 0.004673, 0.002129, -0.010034, -0.007578, -0.014768, -0.008806, -0.014768, -0.001444, -0.000415, -0.014960, -0.019894
+#*# 	  -0.007770, -0.017233, 0.004481, 0.019001, 0.011803, -0.010036, -0.000415, 0.003355, 0.004481, 0.003355, 0.014237, 0.006923, -0.005123, -0.005316, 0.015357, 0.004481, 0.007017, 0.007119, 0.009363, -0.005123
+#*# 	  -0.005123, 0.006923, 0.002229, 0.011803, 0.003259, 0.002037, -0.000316, 0.009362, 0.015452, 0.007119, 0.006921, -0.005123, -0.006350, -0.017426, -0.000316, -0.002671, -0.002670, 0.000910, -0.000217, 0.000811
+#*# 	  -0.008806, 0.009362, 0.004481, -0.000415, 0.002224, 0.011803, 0.014237, 0.007021, 0.016668, 0.017882, 0.014237, 0.006923, 0.011803, 0.009363, 0.006923, 0.006923, 0.009362, 0.005798, -0.007579, -0.010034
+#*# 	  -0.002671, -0.002671, 0.010582, 0.011803, -0.005219, 0.009362, 0.009362, 0.011803, 0.009362, 0.011803, 0.014235, 0.002037, -0.003897, -0.008809, -0.000415, -0.005221, -0.000217, -0.007579, -0.014961, -0.011264
+#*# 	  -0.002671, -0.019894, -0.002670, 0.009362, 0.016668, -0.002769, 0.009362, 0.016668, 0.021332, 0.012919, 0.014237, 0.017882, 0.011803, 0.005702, 0.004673, 0.009362, 0.005800, 0.009362, 0.003259, -0.005123
+#*# 	  -0.002864, -0.006350, -0.005123, 0.002229, 0.011799, 0.006923, 0.001001, 0.011803, 0.020211, -0.000217, -0.003897, -0.012494, 0.004572, 0.002229, -0.007675, -0.017234, -0.005123, -0.000221, -0.014768, -0.013728
+#*# 	  -0.014961, -0.024642, -0.003999, -0.010034, -0.005123, 0.002229, -0.000321, -0.008809, -0.010034, 0.009363, 0.014237, 0.006921, 0.002037, 0.008240, 0.004481, -0.002767, 0.006923, 0.009362, 0.014237, -0.017426
+#*# 	  -0.014961, -0.029601, 0.000905, 0.002037, -0.017338, -0.019700, 0.006921, 0.006923, -0.012405, -0.007578, 0.011799, 0.011798, 0.002229, -0.024747, -0.027123, -0.012405, -0.007578, -0.009946, -0.022170, -0.024642
+#*# min_x = 35.0
+#*# min_y = 35.0
+#*# max_x = 270.0
+#*# max_y = 270.0
+#*# x_count = 20
+#*# y_count = 20
+#*# mesh_x_pps = 0
+#*# mesh_y_pps = 0
+#*# algo = bicubic
+#*# tension = 0.2
+#*#
+#*# [cartographer]
+#*# z_backlash = 0.00255
+#*#
+#*# [cartographer touch_model default]
+#*# threshold = 2851
+#*# speed = 2
+#*# z_offset = -0.05
+#*# software_version = 1.6.0
+#*# mcu_version = CARTOGRAPHER V3 6.1.0
+#*#
+#*# [cartographer scan_model default]
+#*# coefficients = 1.3671573048673884,1.8327762033676283,0.8407257361532513,0.4591981801012914,0.5105275880419052,0.44897455794861757,-0.3261043733473322,-0.3904742553431979,0.4074127203963601,0.35279113403127427
+#*# domain = 3.1623920072678475e-07,3.3292423292085154e-07
+#*# z_offset = 0
+#*# reference_temperature = 37.02
+#*# software_version = 1.5.2
+#*# mcu_version = CARTOGRAPHER V3 6.1.0
+#*#
+#*# [heater_bed]
+#*# control = pid
+#*# pid_kp = 71.898
+#*# pid_ki = 0.718
+#*# pid_kd = 1801.057
+#*#
+#*# [extruder]
+#*# control = pid
+#*# pid_kp = 35.419
+#*# pid_ki = 5.024
+#*# pid_kd = 62.428
+#*#
+#*# [input_shaper]
+#*# shaper_type_x = 3hump_ei
+#*# shaper_freq_x = 76.6
+#*# shaper_type_y = mzv
+#*# shaper_freq_y = 40.6
