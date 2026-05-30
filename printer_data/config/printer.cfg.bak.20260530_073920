@@ -406,13 +406,10 @@ insert_gcode:
 # event_delay: 3.0
 # pause_delay: 0.5
 
-# Removed: redundant stock sensor on ^Toolhead:PA3 - duplicated Happy Hare
-# extruder_sensor (extruder_switch_pin in mmu_hardware.cfg). Cleared the HH
-# "may interfere with MMU functionality" startup warning. Nothing referenced it.
-#[filament_switch_sensor Extruder] # changed by ws -- managed by Happy Hare (toolhead_switch_pin)
-#switch_pin: ^Toolhead:PA3
-#pause_on_runout: False
-#runout_gcode:
+[filament_switch_sensor Extruder] # changed by ws -- managed by Happy Hare (toolhead_switch_pin)
+switch_pin: ^Toolhead:PA3
+pause_on_runout: False
+runout_gcode:
 
 
 #[filament_switch_sensor Toolhead]
