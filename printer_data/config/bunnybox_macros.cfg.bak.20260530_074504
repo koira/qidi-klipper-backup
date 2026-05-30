@@ -242,13 +242,3 @@ gcode:
 gcode:
     {% set slot = params.SLOT|default(-1)|int %}
     MMU_EJECT GATE={slot}
-
-
-[gcode_macro MMU_TANGLE_DETECTED]
-description: Handler for the Qidi Box filament tangle sensor (filament_tangle_sensor runout_gcode)
-gcode:
-    {% if printer.print_stats.state == "printing" %}
-        RESPOND TYPE=error MSG="Filament tangle detected - pausing print"
-        PAUSE                       # Happy Hare wraps PAUSE, so this is MMU-aware
-        BEEP I=5                    # Audible alert: 5 beeps
-    {% endif %}
