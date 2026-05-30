@@ -80,7 +80,7 @@ gcode:
     M204 S10000
     G1 X75 F12000
     G1 X58 Y318 F12000
-    G1 X75 F12000
+    G1 X75 F120000
     G1 X58 Y324 F9000
     G1 Y318 F12000
     G1 X75 Y324 F9000
@@ -95,8 +95,7 @@ gcode:
 [gcode_macro BOX_MOVE_TO_CUTTER]
 description: Move tool-head to the filament cutter activation block
 gcode:
-    G28 X                       # Force re-home X to recover any lost steps before approaching cutter at X304 (1mm from X-max)
-    BOX_HOME_XY                  # Ensure Y (and X if needed) homed
+    BOX_HOME_XY
     M204 S10000
     {% if printer.gcode_move.position.y > 300 %}
         G1 Y300 F9000
